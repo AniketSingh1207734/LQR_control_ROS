@@ -33,12 +33,12 @@ class LQRController:
                            [0, 1.0, 0],
                            [0, 0, 1.0]])
 
-        self.Q = np.array([[100.0, 0, 0],  # Penalize X position error 
-                           [0, 100.0, 0],  # Penalize Y position error 
+        self.Q = np.array([[1000.0, 0, 0],  # Penalize X position error 
+                           [0, 1000.0, 0],  # Penalize Y position error 
                            [0, 0, 0.1]])  # Penalize YAW ANGLE heading error 
 
-        self.R = np.array([[0.1, 0],  # Penalize linear velocity effort
-                           [0, 0.1]])  # Penalize angular velocity effort
+        self.R = np.array([[0.9, 0],  # Penalize linear velocity effort
+                           [0, 0.9]])  # Penalize angular velocity effort
 
         # Set time step
         self.dt = 0.1  # 100 ms
@@ -126,8 +126,13 @@ class LQRController:
 
             # Stop when the error is small
             state_error_magnitude = np.linalg.norm(self.actual_state_x - self.desired_state_xf)
-            if state_error_magnitude < 0.1:
+            if state_error_magnitude < 0.9:
                 rospy.loginfo("Goal reached!")
+                # Publish a final stop command
+                stop_twist = Twist()
+                stop_twist.linear.x = 0.0
+                stop_twist.angular.z = 0.0
+                self.cmd_pub.publish(stop_twist)
                 break
 
             # Sleep to maintain loop rate
